@@ -30,7 +30,7 @@ PBS_REPOSITORY="${PBS_REPOSITORY:-user@pbs@pbs.example.com:datastore-name}"
 #   export PBS_PASSWORD="the-token-secret"
 
 BACKUP_ID="$(hostname -s)"          # shows up as the "backup ID" in PBS
-NAMESPACE=""                        # e.g. "cluster1/nodes" - leave empty for root ns
+NAMESPACE="${NAMESPACE:-}"          # e.g. "cluster1/nodes" - leave empty for root ns
 BACKUP_TYPE="host"                  # PBS backup-type for this kind of backup
 STAGING_DIR="/var/tmp/pve-node-backup-staging"
 LOG_TAG="pve-node-backup"
