@@ -196,6 +196,58 @@ it doesn't matter which node's copy — or when — it gets captured. Run each
 node on a similar daily cadence; exact synchronization isn't required, only
 mild staggering to spread load on the PBS server.
 
+## Running an on-demand backup
+
+### If you used the systemd timer (recommended setup)
+
+Trigger the existing service unit directly — it already has credentials
+wired up via `EnvironmentFile`, so there's nothing to export manually:
+
+```bash
+sudo systemctl start pve-node-backup.service
+```
+
+Watch it live:
+
+```bash
+sudo systemctl start pve-node-backup.service && journalctl -u pve-node-backup.service -f
+```
+
+or tail the script's own log:
+
+```bash
+sudo systemctl start pve-node-backup.service
+tail -f /var/log/pve-node-backup.log
+```
+
+Check it finished cleanly:
+
+```bash
+systemctl status pve-node-backup.service
+# oneshot units show "inactive (dead)" with "(code=exited, status=0/SUCCESS)" when done
+```
+
+### If you used cron or ran the script manually
+
+Source the env file and call the script directly:
+
+```bash
+sudo bash -c '. /etc/pve-node-backup.env && /usr/local/bin/pve-node-backup.sh'
+```
+
+### Kicking off a backup on every node at once
+
+If you'd rather not SSH to each node individually:
+
+```bash
+pvecm nodes | awk 'NR>3{print $3}' | while read -r n; do
+  ssh "$n" 'systemctl start pve-node-backup.service'
+done
+```
+
+(or loop over your known hostnames directly if you'd rather not parse
+`pvecm nodes` output)
+
 ## Restoring after a node rebuild
 
 Typical flow for replacing a dead node in an otherwise healthy cluster:
