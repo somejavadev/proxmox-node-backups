@@ -35,6 +35,7 @@ genuinely local to the host and would otherwise be lost.
 
 | File | Purpose |
 |---|---|
+| `install.sh` | Interactive installer: installs scripts, sets up credentials, schedules the backup |
 | `pve-node-backup.sh` | Stages node-specific files + `/etc/pve`, sends them to PBS |
 | `pve-node-restore.sh` | Lists / extracts / (optionally) applies a backup |
 | `examples/pve-node-backup.env.example` | Template for PBS credentials |
@@ -49,6 +50,40 @@ genuinely local to the host and would otherwise be lost.
 - Run as root (needs to read `/etc/ssh`, `/etc/corosync`, etc.)
 
 ## Setup
+
+### Option A: Interactive installer (recommended)
+
+1. Create a PBS API token for backups (recommended over a raw user password):
+   ```bash
+   # On the PBS server
+   proxmox-backup-manager user generate-token backup@pbs pve-node-backup
+   ```
+   Grant it `DatastoreBackup` (and `DatastoreReader` if you also want restores
+   with the same token) on the target datastore.
+2. Clone this repo onto the node and run the installer as root:
+   ```bash
+   git clone <this-repo-url> pve-node-backup
+   cd pve-node-backup
+   sudo ./install.sh
+   ```
+3. `install.sh` will:
+   - offer to install `proxmox-backup-client` via apt if it's missing
+   - install `pve-node-backup.sh` / `pve-node-restore.sh` to `/usr/local/bin`
+   - prompt for your PBS repository string, password/token, optional TLS
+     fingerprint, and optional namespace
+   - write those into a root-only (`chmod 600`) env file at
+     `/etc/pve-node-backup.env`
+   - optionally test the PBS connection
+   - let you choose **systemd timer** (default) or **cron** for scheduling,
+     prompting for the daily run time
+   - optionally run a backup immediately so you can confirm it works
+
+   Repeat step 2–3 on every node — each one uses its own hostname as the
+   PBS backup-id automatically, so the same repository/credentials can be
+   reused unchanged across the whole cluster. Re-running `install.sh` on a
+   node you've already set up is safe; it shows current values as defaults.
+
+### Option B: Manual setup
 
 1. Copy `pve-node-backup.sh` and `pve-node-restore.sh` to each node, e.g.:
    ```bash
@@ -98,6 +133,11 @@ the top of `pve-node-restore.sh` for when that's actually appropriate
 (essentially only: rebuilding the last surviving node of a lost cluster).
 
 ## Scheduling the backup
+
+If you used `install.sh`, scheduling is already done — skip to
+[Do all nodes need to run at the same time?](#do-all-nodes-need-to-run-at-the-same-time)
+below. This section covers what the installer does under the hood, and how
+to do it by hand if you used the manual setup instead.
 
 You have two straightforward options. **systemd timers are recommended**
 over cron because they let you keep credentials out of the crontab and out
