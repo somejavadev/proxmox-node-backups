@@ -67,16 +67,16 @@ genuinely local to the host and would otherwise be lost.
    sudo ./install.sh
    ```
 3. `install.sh` will:
-    - offer to install `proxmox-backup-client` via apt if it's missing
-    - install `pve-node-backup.sh` / `pve-node-restore.sh` to `/usr/local/bin`
-    - prompt for your PBS repository string, password/token, optional TLS
-      fingerprint, and optional namespace
-    - write those into a root-only (`chmod 600`) env file at
-      `/etc/pve-node-backup.env`
-    - optionally test the PBS connection
-    - let you choose **systemd timer** (default) or **cron** for scheduling,
-      prompting for the daily run time
-    - optionally run a backup immediately so you can confirm it works
+   - offer to install `proxmox-backup-client` via apt if it's missing
+   - install `pve-node-backup.sh` / `pve-node-restore.sh` to `/usr/local/bin`
+   - prompt for your PBS repository string, password/token, optional TLS
+     fingerprint, and optional namespace
+   - write those into a root-only (`chmod 600`) env file at
+     `/etc/pve-node-backup.env`
+   - optionally test the PBS connection
+   - let you choose **systemd timer** (default) or **cron** for scheduling,
+     prompting for the daily run time
+   - optionally run a backup immediately so you can confirm it works
 
    Repeat step 2–3 on every node — each one uses its own hostname as the
    PBS backup-id automatically, so the same repository/credentials can be
