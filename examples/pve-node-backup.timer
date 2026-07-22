@@ -1,0 +1,14 @@
+[Unit]
+Description=Run Proxmox node config backup nightly
+
+[Timer]
+# Runs daily at 03:00, plus up to 10 minutes of random jitter so that
+# multiple cluster nodes on the same timer don't all hit PBS in the
+# same instant. Adjust OnCalendar per-node if you want fixed staggering
+# instead (e.g. 03:00, 03:05, 03:10 on node1/node2/node3).
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=600
+Persistent=true
+
+[Install]
+WantedBy=timers.target

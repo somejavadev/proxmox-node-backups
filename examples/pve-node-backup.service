@@ -1,0 +1,14 @@
+[Unit]
+Description=Proxmox node config backup to PBS
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/pve-node-backup.env
+ExecStart=/usr/local/bin/pve-node-backup.sh
+# Keep secrets out of process listings / journal command-lines:
+# credentials are read from EnvironmentFile above, not passed as args.
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
